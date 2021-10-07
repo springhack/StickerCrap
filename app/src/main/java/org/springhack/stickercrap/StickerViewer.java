@@ -1,29 +1,23 @@
 package org.springhack.stickercrap;
 
 import android.content.ClipData;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.os.FileUtils;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintHelper;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.FileProvider;
 
 import com.google.android.flexbox.AlignItems;
-import com.google.android.flexbox.AlignSelf;
 import com.google.android.flexbox.FlexboxLayout;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -41,16 +35,20 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import static org.springhack.stickercrap.Utils.AttrGetter;
+import static org.springhack.stickercrap.Utils.md5;
 
 public class StickerViewer extends AppCompatActivity {
+
+    private File shared_files = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sticker_viewer);
 
         final int DPS = getResources().getDimensionPixelSize(R.dimen.dps);
-        File shared_files = new File(getCacheDir(), "shared_files");
+        shared_files = new File(getCacheDir(), "shared_files");
         shared_files.mkdirs();
 
         ConstraintLayout layout = (ConstraintLayout)findViewById(R.id.viewer);
@@ -84,12 +82,12 @@ public class StickerViewer extends AppCompatActivity {
                     Document document = Jsoup
                             .connect(url)
                             .userAgent(Constants.USER_AGENT)
-                            .referrer(Constants.STICKER_LIST_URL)
+                            .referrer(Constants.FetchConfig.STICKER_LIST_URL)
                             .get();
-                    Elements elements = document.select(".stiker_content_ele");
+                    Elements elements = document.select(Constants.FetchConfig.StickerResolver.SELECTOR);
                     List<String> stickers = new ArrayList<String>();
                     for (Element node : elements) {
-                        stickers.add(node.absUrl("src"));
+                        stickers.add(AttrGetter(node, Constants.FetchConfig.StickerResolver.GETTER));
                     }
                     runOnUiThread(new Runnable() {
                         @Override
@@ -142,30 +140,5 @@ public class StickerViewer extends AppCompatActivity {
                 }
             }
         }).start();
-    }
-
-    public static String md5(final String s) {
-        final String MD5 = "MD5";
-        try {
-            // Create MD5 Hash
-            MessageDigest digest = java.security.MessageDigest
-                    .getInstance(MD5);
-            digest.update(s.getBytes());
-            byte messageDigest[] = digest.digest();
-
-            // Create Hex String
-            StringBuilder hexString = new StringBuilder();
-            for (byte aMessageDigest : messageDigest) {
-                String h = Integer.toHexString(0xFF & aMessageDigest);
-                while (h.length() < 2)
-                    h = "0" + h;
-                hexString.append(h);
-            }
-            return hexString.toString();
-
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return "";
     }
 }
