@@ -11,7 +11,8 @@ public class Constants {
     public static String[] ALLOW_PACKAGES = {
             "com.fluidtouch.noteshelf2",
             "com.samsung.android.app.notes",
-            "com.samsung.android.spdfnote"
+            "com.samsung.android.spdfnote",
+            "com.steadfastinnovation.android.projectpapyrus"
     };
     public static class FetchConfig {
         public static String STICKER_LIST_URL = "https://sticker.weixin.qq.com/cgi-bin/mmemoticon-bin/emoticonview?oper=billboard&t=rank";
